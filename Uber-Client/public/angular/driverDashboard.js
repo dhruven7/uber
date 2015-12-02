@@ -9,19 +9,28 @@ app.controller('socket',['$scope','socket',function($scope,socket){
 
 }]);
 
-app.controller('navbar',[ '$rootScope','$scope','$http','socket',function($scope,$rootScope, $http,socket) {
+app.controller('navbar',[ '$scope', '$rootScope','$http','socket',function($scope,$rootScope, $http,socket) {
 
 	$http.get("/getDriverInformation")
 			.success(function(response) {
 				//alert(JSON.stringify(response));
 				if (response.status == 200) {
 					//alert(JSON.stringify(response.data.firstName));
-					$scope.firstName = response.data[0].firstName;
-					$scope.email = response.data[0].email;
-					$rootScope.currentRideId = response.data[0].currentRideId;
-					socket.emit('join',{ email: $scope.email });
+					//alert("inside navbar");
+					$scope.firstName = response.data.firstName;
+
+					if(typeof(response.data.currentRideId) != "undefined" && response.data.currentRideId.length>0) {
+						$rootScope.currentRideId = response.data.currentRideId;
+					}else{
+						$rootScope.currentRideId = false;
+					}
+					socket.emit('join',{ email: response.data.email });
+					$rootScope.getRideInfo(response.data.email);
+
+
 				}
 				else{
+					//alert("else");
 					//window.location.assign('/logout');
 				}
 
@@ -30,21 +39,32 @@ app.controller('navbar',[ '$rootScope','$scope','$http','socket',function($scope
 			});
 }]);
 
-app.controller('myrides', function($scope, $http) {
+app.controller('myrides', function($scope,$rootScope, $http) {
+	//alert($rootScope.email);
 	
-	$http.get("/driverRideList").success(function(response) {
-		//alert(JSON.stringify(response.status));
-		if (response.status == 200) {
-			//alert(JSON.stringify(response));
-			$scope.rides = response.data;
+	$rootScope.getRideInfo = function(email){
+		
+		alert("email " + email); 
+		$http({
+		method: "GET",
+		url : '/searchBills',
+		params : {
+			startPosition : 0,
+			searchText : email
 		}
-		else{
-			$scope.rides = "";
-		}
-	}).error(function(error){
-		window.location.assign('/errorDriver');
+	}).success(function(response){
+
+		$scope.rides = response;
+
+		}).error(function(){
+
+		alert("error");
 	});
+	}
+
 });
+
+
 
 app.controller('profile', function($scope, $http) {
 
@@ -52,6 +72,8 @@ app.controller('profile', function($scope, $http) {
 	$http.get("/getDriverInformation").success(function(response) {
 		//alert("dsadsad");
 		if (response.status == 200) {
+			//alert("inside profile");
+			//alert(JSON.stringify(response.data));
 			$scope.firstName = response.data.firstName;
 			$scope.lastName = response.data.lastName;
 			$scope.ssn = response.data.ssn;
@@ -63,10 +85,12 @@ app.controller('profile', function($scope, $http) {
 			$scope.phoneNumber = response.data.phoneNumber;
 		}
 		else{
+			//alert("else new");
 			//window.location.assign('/logout');
 		}
 
 	}).error(function(error){
+		//alert("error new");
 		window.location.assign('/errorDriver');
 	});
 
