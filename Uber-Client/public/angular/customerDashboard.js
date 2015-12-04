@@ -1,4 +1,4 @@
-var app = angular.module('ngMap');
+var app = angular.module('ngMap',['infinite-scroll']);
 
 app.controller('socket',['$scope','socket',function($scope,socket){
 
@@ -14,12 +14,12 @@ app.controller('rides', function($scope, $rootScope, $http) {
 
 	//alert("getRideImage");
 	var startPosition = 0;
-	$scope.items = [];
+	$scope.rides = [];
 	$scope.loadMore = false;
 	$rootScope.getRidesInitialInfo = function(customerId){
 
 		$scope.customerId = customerId;
-		$http({
+		/*$http({
 			method: "GET",
 			url : '/searchBills',
 			params : {
@@ -31,7 +31,7 @@ app.controller('rides', function($scope, $rootScope, $http) {
 			// alert('inside');
 
 			$scope.rides = response;
-			startPosition = $scope.items.length;
+			startPosition = $scope.rides.length;
 			angular.forEach(items, function (res) {
 
 				$http({
@@ -48,18 +48,18 @@ app.controller('rides', function($scope, $rootScope, $http) {
 
 		}).error(function(){
 			alert("error");
-			$scope.items = [];
-			startPosition = $scope.items.length;
-		});
+			$scope.rides = [];
+			startPosition = $scope.rides.length;
+		});*/
 	};
 
 
 	$scope.getRidesInfo = function () {
 		$http({
 			method: "GET",
-			url: '/searchCustomers',
+			url: '/searchBills',
 			params: {
-				"search":  $scope.customerId,
+				"searchText":  $scope.customerId,
 				"startPosition": startPosition
 			}
 		}).success(function (response) {
@@ -69,9 +69,9 @@ app.controller('rides', function($scope, $rootScope, $http) {
 				$scope.loadMore = true;
 			}
 			for (var i = 0, len = items.length; i < len; ++i) {
-				$scope.items.push(items[i]);
+				$scope.rides.push(items[i]);
 			}
-			startPosition = $scope.items.length;
+			startPosition = $scope.rides.length;
 
 			angular.forEach(items, function (res) {
 
@@ -89,8 +89,8 @@ app.controller('rides', function($scope, $rootScope, $http) {
 
 		}).error(function (err) {
 			alert("error");
-			$scope.items = [];
-			startPosition = $scope.items.length;
+			$scope.rides = [];
+			startPosition = $scope.rides.length;
 		});
 	};
 

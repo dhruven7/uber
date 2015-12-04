@@ -1,4 +1,4 @@
-var app = angular.module('ngMap');
+var app = angular.module('ngMap',['infinite-scroll']);
 
 app.controller('ridesPerArea', function($scope, $http){
 
@@ -194,17 +194,23 @@ app.controller('drivers', function ($scope, $http) {
             method: "GET",
             url: '/searchDriver',
             params: {
-                search: $scope.search
+                "search": $scope.search,
+                "startPosition": startPosition
             }
         }).success(function (response) {
-            if (response.status == 200) {
-                $scope.items = response.data;
+
+            var items = response;
+            if(items.length == 0){
+                $scope.loadMore = true;
             }
-            else {
-                $scope.items = [];
+            for (var i = 0, len = items.length; i < len; ++i) {
+                $scope.items.push(items[i]);
             }
             startPosition = $scope.items.length;
 
+        }).error(function (err) {
+            $scope.items = [];
+            startPosition = $scope.items.length;
         });
     };
 
@@ -313,7 +319,7 @@ app.controller('billing', function ($scope, $http) {
             method: "GET",
             url: '/searchBills',
             params: {
-                "search": $scope.search,
+                "searchText": $scope.search,
                 "startPosition": 0
             }
         }).success(function (response) {
@@ -328,9 +334,9 @@ app.controller('billing', function ($scope, $http) {
     $scope.getBillList = function () {
         $http({
             method: "GET",
-            url: '/searchCustomers',
+            url: '/searchBills',
             params: {
-                "search": $scope.search,
+                "searchText": $scope.search,
                 "startPosition": startPosition
             }
         }).success(function (response) {
